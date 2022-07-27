@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Mesh, Vector3, MathUtils, XRFrameRequestCallback } from "three";
+import { Mesh, Vector3, MathUtils } from "three";
 import gsap from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import theme from "utils/theme";
