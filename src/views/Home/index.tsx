@@ -1,8 +1,8 @@
-import React from 'react';
-import StyledHome from './style';
+import React from "react";
+import StyledHome from "./style";
 
-import Header from 'components/Header';
-import ThreeComponent from 'components/ThreeComponent';
+import Header from "components/Header";
+import ThreeComponent from "components/ThreeComponent";
 
 const Home: React.FC = () => {
   return (
@@ -11,6 +11,6 @@ const Home: React.FC = () => {
       <ThreeComponent />
     </StyledHome>
   );
-}
+};
 
 export default Home;
