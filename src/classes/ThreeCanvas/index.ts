@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Mesh, Vector3, MathUtils } from "three";
+import { Mesh, Vector3, MathUtils, XRFrameRequestCallback } from "three";
 import gsap from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import theme from "utils/theme";
@@ -19,8 +19,8 @@ interface IOptions {
 
 class ThreeCanvas {
   private renderer: THREE.WebGLRenderer;
-  private composer: THREE.Composer;
-  private camera: THREE.Camera;
+  private composer: EffectComposer;
+  private camera: THREE.PerspectiveCamera;
   private cubeGroup: THREE.Group;
   private clock: THREE.Clock;
 
@@ -89,7 +89,7 @@ class ThreeCanvas {
     });
 
     for (let i = 0; i < 2; i++) {
-      const geometry = new THREE.BoxGeometry();
+      const geometry = new THREE.SphereGeometry(1, 50, 50);
 
       const cube = new Mesh(geometry, material);
       cubeGroup.add(cube);
@@ -131,7 +131,7 @@ class ThreeCanvas {
     return needResize;
   }
 
-  public setAnimationLoop(callback: Function) {
+  public setAnimationLoop(callback: XRFrameRequestCallback) {
     this.renderer.setAnimationLoop(callback);
   }
 
@@ -141,6 +141,7 @@ class ThreeCanvas {
       const canvas = this.renderer.domElement;
       this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
       this.camera.updateProjectionMatrix();
+      //this.camera.up
     }
 
     this.composer.render();
