@@ -5,6 +5,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import theme from "utils/theme";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+
 import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import {
   vertex as basicVertex,
@@ -23,6 +24,7 @@ class ThreeCanvas {
   private camera: THREE.PerspectiveCamera;
   private cubeGroup: THREE.Group;
   private clock: THREE.Clock;
+  private frameCount: number = 0;
 
   constructor(options: IOptions) {
     const { mountPoint, width, height } = options;
@@ -131,12 +133,12 @@ class ThreeCanvas {
     return needResize;
   }
 
-  public setAnimationLoop(callback: XRFrameRequestCallback) {
-    this.renderer.setAnimationLoop(callback);
-  }
-
   render() {
-    // check if we need to resize the canvas and re-setup the camera
+    this.frameCount = this.frameCount + 1;
+    this.group.rotation.y = this.frameCount / 360;
+    //console.log(this.frameCount);
+
+    // check if we need to resize the canvas and re-setup the cameras
     if (this.resizeRendererToDisplaySize(this.renderer)) {
       const canvas = this.renderer.domElement;
       this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -145,6 +147,16 @@ class ThreeCanvas {
     }
 
     this.composer.render();
+  }
+
+  startAnimationLoop() {
+    this.renderer.setAnimationLoop(() => {
+      this.render();
+    });
+  }
+
+  stopAnimationLoop() {
+    this.renderer.setAnimationLoop(() => {});
   }
 }
 

@@ -1,7 +1,8 @@
-import React from 'react';
-import StyledThreeComponent from './style';
-import ThreeCanvas from 'classes/ThreeCanvas';
-import AppState from 'stores/App';
+import React from "react";
+import StyledThreeComponent from "./style";
+import ThreeCanvas from "classes/ThreeCanvas";
+import AppState from "stores/App";
+import { getCombinedNodeFlags } from "typescript";
 
 interface IState {
   initialized: boolean;
@@ -10,6 +11,8 @@ interface IState {
 class ThreeComponent extends React.Component<{}, IState> {
   private threeCanvasEl: React.RefObject<HTMLDivElement>;
   static contextType = AppState;
+
+  threeCanvas: ThreeCanvas;
 
   constructor(props: any) {
     super(props);
@@ -21,9 +24,7 @@ class ThreeComponent extends React.Component<{}, IState> {
     this.threeCanvasEl = React.createRef();
   }
 
-  componentDidUpdate() {
-    // const { SOME_VAR } = this.context; // get a var from React Context
-  }
+  componentDidUpdate() {}
 
   componentDidMount() {
     if (!this.state.initialized) {
@@ -31,27 +32,22 @@ class ThreeComponent extends React.Component<{}, IState> {
     }
   }
 
-  init = () => {
-    // const appState = this.context; // access to the React Context store
+  componentWillUnmount() {
+    this.threeCanvas.stopAnimationLoop();
+  }
 
-    const threeCanvas = new ThreeCanvas({
+  init = () => {
+    // const appState = this.context; // access to the React Context store1
+
+    this.threeCanvas = new ThreeCanvas({
       mountPoint: this.threeCanvasEl.current,
       width: this.threeCanvasEl.current.clientWidth,
       height: this.threeCanvasEl.current.clientHeight,
     });
 
-    // start draw loop
-    this.startDrawing(threeCanvas);
-    this.setState({initialized: true});
-  }
-
-  startDrawing(threeCanvas: ThreeCanvas) {
-    const renderLoop = () => {
-      threeCanvas.render();
-    };
-
-    threeCanvas.setAnimationLoop(renderLoop);
-  }
+    this.threeCanvas.startAnimationLoop();
+    this.setState({ initialized: true });
+  };
 
   render() {
     return (
@@ -59,8 +55,7 @@ class ThreeComponent extends React.Component<{}, IState> {
         className="threeComponent"
         initialized={this.state.initialized}
       >
-        <div className="visualizationMount" ref={this.threeCanvasEl}>
-        </div>
+        <div className="visualizationMount" ref={this.threeCanvasEl}></div>
       </StyledThreeComponent>
     );
   }
