@@ -1,39 +1,39 @@
-import React from "react";
-import StyledThreeComponent from "./style";
-import ThreeCanvas from "classes/ThreeCanvas";
-import AppState from "stores/App";
-import { getCombinedNodeFlags } from "typescript";
+import React from 'react'
+import StyledThreeComponent from './style'
+import ThreeCanvas from 'classes/ThreeCanvas'
+import AppState from 'stores/App'
+import { getCombinedNodeFlags } from 'typescript'
 
 interface IState {
-  initialized: boolean;
+  initialized: boolean
 }
 
 class ThreeComponent extends React.Component<{}, IState> {
-  private threeCanvasEl: React.RefObject<HTMLDivElement>;
-  static contextType = AppState;
+  private threeCanvasEl: React.RefObject<HTMLDivElement>
+  static contextType = AppState
 
-  threeCanvas: ThreeCanvas;
+  threeCanvas: ThreeCanvas
 
   constructor(props: any) {
-    super(props);
+    super(props)
 
     this.state = {
-      initialized: false,
-    };
+      initialized: false
+    }
 
-    this.threeCanvasEl = React.createRef();
+    this.threeCanvasEl = React.createRef()
   }
 
   componentDidUpdate() {}
 
   componentDidMount() {
     if (!this.state.initialized) {
-      this.init();
+      this.init()
     }
   }
 
   componentWillUnmount() {
-    this.threeCanvas.stopAnimationLoop();
+    this.threeCanvas.stopAnimationLoop()
   }
 
   init = () => {
@@ -42,23 +42,20 @@ class ThreeComponent extends React.Component<{}, IState> {
     this.threeCanvas = new ThreeCanvas({
       mountPoint: this.threeCanvasEl.current,
       width: this.threeCanvasEl.current.clientWidth,
-      height: this.threeCanvasEl.current.clientHeight,
-    });
+      height: this.threeCanvasEl.current.clientHeight
+    })
 
-    this.threeCanvas.startAnimationLoop();
-    this.setState({ initialized: true });
-  };
+    this.threeCanvas.startAnimationLoop()
+    this.setState({ initialized: true })
+  }
 
   render() {
     return (
-      <StyledThreeComponent
-        className="threeComponent"
-        initialized={this.state.initialized}
-      >
+      <StyledThreeComponent className="threeComponent" initialized={this.state.initialized}>
         <div className="visualizationMount" ref={this.threeCanvasEl}></div>
       </StyledThreeComponent>
-    );
+    )
   }
 }
 
-export default ThreeComponent;
+export default ThreeComponent
