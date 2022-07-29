@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Mesh, Vector3, MathUtils } from 'three'
+import { Mesh, Vector3, MathUtils, BufferAttribute } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import theme from 'utils/theme'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
@@ -22,10 +22,11 @@ class ThreeCanvas {
   private group: THREE.Group
   private frameCount: number = 0
 
+  //points: Vector3[]
+  line: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>
+
   constructor(options: IOptions) {
     const { mountPoint, width, height } = options
-
-    // this is just here for reference. most of this file should be overwritten :)
 
     // basics
     const clock = (this.clock = new THREE.Clock())
@@ -40,43 +41,49 @@ class ThreeCanvas {
     renderer.setSize(width, height)
     camera.position.z = 0
 
-    // post processing support
     const composer = (this.composer = new EffectComposer(renderer))
-
     const renderPass = new RenderPass(scene, camera)
     renderPass.clear = false
+
     composer.addPass(renderPass)
-
-    // mount to DOM
     mountPoint.appendChild(renderer.domElement)
-    // VR support
-    // renderer.xr.enabled = true;
-    // mountPoint.appendChild( VRButton.createButton( renderer ) );
 
-    this.addMeshes(scene)
+    this.addLines(scene)
+    this.addBoxes(scene)
+  }
+
+  updateLineBuffer() {
+    const positions = this.line.geometry.attributes['position']
+    for (let pointsIndex = 0; pointsIndex < positions.count; pointsIndex++) {
+      positions.setXYZ(
+        pointsIndex,
+        Math.sin((this.frameCount + pointsIndex * 10) / 100),
+        Math.cos((this.frameCount + pointsIndex * 10) / 100),
+        1
+      )
+    }
+    this.line.geometry.attributes.position.needsUpdate = true
   }
 
   addLines(scene: THREE.Scene) {
-    const material = new THREE.LineBasicMaterial({ color: 0x0000ff })
+    const material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.5, transparent: true, linewidth: 10 })
+    const points: Vector3[] = []
+    const count = 10
+    const radius = 2
+    for (let i = 0; i < count; i++) {
+      const f = i / count
+      points.push(new THREE.Vector3(Math.cos(f * Math.PI * 2), Math.sin(f * Math.PI * 2), 0).multiplyScalar(radius))
+    }
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points)
+    this.line = new THREE.Line(geometry, material)
+    scene.add(this.line)
   }
 
-  addMeshes(scene: THREE.Scene) {
+  addBoxes(scene: THREE.Scene) {
     this.group = this.cubeGroup = new THREE.Group()
-    const cubeInitialPositions = [
-      {
-        rotation: new Vector3(35, 35, 0),
-        position: new Vector3(0, -0.5, 0)
-      },
-      {
-        rotation: new Vector3(-35, -95, 0),
-        position: new Vector3(0, 1, 0)
-      }
-    ]
 
-    // some standard material or ShaderMaterial
-    // const material = new THREE.MeshBasicMaterial( { color: theme.baseFontColor } );
     const material = new THREE.ShaderMaterial({
-      // transparent: true,
       side: THREE.DoubleSide,
       vertexShader: basicVertex,
       fragmentShader: basicFragment,
@@ -114,18 +121,24 @@ class ThreeCanvas {
     return needResize
   }
 
+  updateCamera() {
+    if (this.resizeRendererToDisplaySize(this.renderer)) {
+      const canvas = this.renderer.domElement
+      this.camera.aspect = canvas.clientWidth / canvas.clientHeight
+      this.camera.position.z = 10
+      this.camera.updateProjectionMatrix()
+      //this.camera.up
+    }
+  }
+
   render() {
     this.frameCount = this.frameCount + 1
     this.group.rotation.y = this.frameCount / 360
     //console.log(this.frameCount);
 
     // check if we need to resize the canvas and re-setup the cameras
-    if (this.resizeRendererToDisplaySize(this.renderer)) {
-      const canvas = this.renderer.domElement
-      this.camera.aspect = canvas.clientWidth / canvas.clientHeight
-      this.camera.updateProjectionMatrix()
-      //this.camera.up
-    }
+    this.updateCamera()
+    this.updateLineBuffer()
 
     this.composer.render()
   }
