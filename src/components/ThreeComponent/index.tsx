@@ -33,7 +33,7 @@ class ThreeComponent extends React.Component<{}, IState> {
   }
 
   componentWillUnmount() {
-    this.threeCanvas.stopAnimationLoop()
+    this.threeCanvas?.stopAnimationLoop()
   }
 
   init = () => {
