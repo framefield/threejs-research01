@@ -1,12 +1,10 @@
 import * as THREE from 'three'
 import { Mesh, Vector3, MathUtils, BufferAttribute } from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import theme from 'utils/theme'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-
 import { vertex as basicVertex, fragment as basicFragment } from './shaders/basic'
-
 import { CSS3DRenderer, CSS3DSprite, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer'
 
 interface IOptions {
@@ -27,13 +25,13 @@ class ThreeCanvas {
   private group: THREE.Group
   private frameCount: number = 0
 
-  //points: Vector3[ ]
+  private orbitControls: OrbitControls
+
   line: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>
 
   constructor(options: IOptions) {
     const { mountPoint, width, height } = options
 
-    // basics
     const clock = (this.clock = new THREE.Clock())
     this.scene = new THREE.Scene()
     const camera = (this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000))
@@ -50,16 +48,31 @@ class ThreeCanvas {
     const renderPass = new RenderPass(this.scene, camera)
     renderPass.clear = false
 
-    composer.addPass(renderPass)
-    mountPoint.appendChild(renderer.domElement)
-
     this.css3dRenderer = new CSS3DRenderer()
     this.css3dRenderer.domElement.className = 'css3dRenderer'
     mountPoint.appendChild(this.css3dRenderer.domElement)
 
+    composer.addPass(renderPass)
+    mountPoint.appendChild(renderer.domElement)
+
+    this.orbitControls = new OrbitControls(this.camera, renderer.domElement)
+    this.orbitControls.addEventListener('change', this.render2)
+    this.orbitControls.minDistance = 5
+    this.orbitControls.maxDistance = 600
+    this.orbitControls.enableDamping = true
+
     this.addLines(this.scene)
     this.addBoxes(this.scene)
-    this.addSprites(this.scene)
+    this.addCssObjects(this.scene)
+
+    const size = 100
+    const divisions = 100
+    const gridHelper = new THREE.GridHelper(size, divisions, 0x888888, 0xdddddd)
+    this.scene.add(gridHelper)
+  }
+
+  render2() {
+    console.log('here ')
   }
 
   updateLineBuffer() {
@@ -75,21 +88,18 @@ class ThreeCanvas {
     this.line.geometry.attributes.position.needsUpdate = true
   }
 
-  addSprites(scene: THREE.Scene) {
-    // Create DOM for CSS3D
+  addCssObjects(scene: THREE.Scene) {
     const objectDOM = document.createElement('span')
     objectDOM.className = 'sprite'
     objectDOM.style.backgroundColor = 'rgba(0,127,127,' + (Math.random() * 0.5 + 0.25) + ')'
 
     const subObject = document.createElement('span')
-    subObject.className = 'number'
     subObject.textContent = 'hello'
     objectDOM.appendChild(subObject)
-
-    // Create CSS3D Objects
     const objectCSS = new CSS3DObject(objectDOM)
 
-    objectCSS.position.z = -200
+    objectCSS.position.z = 0
+    objectCSS.scale.multiplyScalar(0.04)
     scene.add(objectCSS)
   }
 
@@ -162,7 +172,7 @@ class ThreeCanvas {
 
   render() {
     this.frameCount = this.frameCount + 1
-    this.group.rotation.y = this.frameCount / 360
+    this.orbitControls.update()
 
     // check if we need to resize the canvas and re-setup the cameras
     this.updateCamera()

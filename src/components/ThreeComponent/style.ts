@@ -18,8 +18,10 @@ export default styled.div<IProps>`
     border: 1px solid red;
     position: fixed;
     top: 0;
+    pointer-events: none;
 
     .sprite {
+      pointer-events: none;
       width: 200px;
       height: 100px;
       font-size: 50px;
