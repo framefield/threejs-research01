@@ -61,7 +61,7 @@ class ThreeCanvas {
     this.orbitControls.maxDistance = 600
     this.orbitControls.enableDamping = true
 
-    this.addLines(this.scene)
+    this.addLine(this.scene)
     this.addBoxes(this.scene)
     this.addCssObjects(this.scene)
 
@@ -73,19 +73,6 @@ class ThreeCanvas {
 
   render2() {
     console.log('here ')
-  }
-
-  updateLineBuffer() {
-    const positions = this.line.geometry.attributes['position']
-    for (let pointsIndex = 0; pointsIndex < positions.count; pointsIndex++) {
-      positions.setXYZ(
-        pointsIndex,
-        Math.sin((this.frameCount + pointsIndex * 10) / 100),
-        Math.cos((this.frameCount + pointsIndex * 10) / 100),
-        1
-      )
-    }
-    this.line.geometry.attributes.position.needsUpdate = true
   }
 
   addCssObjects(scene: THREE.Scene) {
@@ -103,7 +90,7 @@ class ThreeCanvas {
     scene.add(objectCSS)
   }
 
-  addLines(scene: THREE.Scene) {
+  addLine(scene: THREE.Scene) {
     const material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.5, transparent: true, linewidth: 10 })
     const points: Vector3[] = []
     const count = 10
@@ -142,6 +129,20 @@ class ThreeCanvas {
     this.group.position.z = -7 // push 7 meters back
     scene.add(this.group)
     this.clock.start()
+  }
+
+  updateLineBuffer() {
+    const positions = this.line.geometry.attributes['position']
+
+    for (let pointsIndex = 0; pointsIndex < positions.count; pointsIndex++) {
+      positions.setXYZ(
+        pointsIndex,
+        Math.sin((this.frameCount + pointsIndex * 10) / 100),
+        Math.cos((this.frameCount + pointsIndex * 10) / 100),
+        1
+      )
+    }
+    this.line.geometry.attributes.position.needsUpdate = true
   }
 
   resizeRendererToDisplaySize() {
